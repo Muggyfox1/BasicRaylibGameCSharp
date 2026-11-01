@@ -1,4 +1,5 @@
 ﻿using Raylib_cs;
+using System.Numerics;
 
 namespace Game;
 
@@ -21,19 +22,34 @@ internal static class Program {
 }
 
 class Game {
+
+    Camera3D camera = new Camera3D();
     internal void Init() {
         Raylib.InitWindow(800, 480, "Hello, World");
+        Raylib.SetTargetFPS(60);
+
+        camera.Position = new Vector3(0, 10, 10);
+        camera.Target = Vector3.Zero;
+        camera.Up = new Vector3(0, 1, 0);
+        camera.FovY = 45;
+        camera.Projection = CameraProjection.Perspective;
     }
 
     internal void Update() {
-        //throw new NotImplementedException();
+        Raylib.UpdateCamera(ref camera, CameraMode.Orbital);
     }
 
     internal void Draw() {
+        //draw UI
         Raylib.BeginDrawing();
 
         Raylib.ClearBackground(Color.White);
-        
+
+        Raylib.BeginMode3D(camera);
+        Raylib.DrawGrid(10, 1);
+        Raylib.DrawCube(Vector3.Zero, 1, 1, 1, Color.Red);
+        Raylib.EndMode3D();
+
         Raylib.DrawRectangle(10, 10, 108, 20, new Color(0, 0, 0, 100));
         Raylib.DrawFPS(12, 12);
 
