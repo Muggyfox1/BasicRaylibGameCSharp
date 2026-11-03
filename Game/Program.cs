@@ -70,12 +70,23 @@ class Game {
 
         mouseDeltaThisFrame = Raylib.GetMouseDelta();
         if(isMouseLocked) {
-            cameraRotation.X += mouseDeltaThisFrame.X * mouseSensitivity;
-            cameraRotation.Y += mouseDeltaThisFrame.Y * mouseSensitivity;
+            cameraRotation.X += mouseDeltaThisFrame.X * mouseSensitivity; // yaw
+            cameraRotation.Y += mouseDeltaThisFrame.Y * mouseSensitivity; // pitch
             cameraRotation.Y = Math.Clamp(cameraRotation.Y, -89f, 89f);
         }
 
-        camera.Position = cameraOffset + playerPosition;
+        float yawRad = cameraRotation.X * Raylib.DEG2RAD;
+        float pitchRad = cameraRotation.Y * Raylib.DEG2RAD;
+
+        float orbitDistance = cameraOffset.Length();
+
+        Vector3 orbitDirection = new Vector3(
+            MathF.Cos(pitchRad) * MathF.Sin(yawRad),
+            MathF.Sin(pitchRad),
+            MathF.Cos(pitchRad) * MathF.Cos(yawRad)
+        );
+
+        camera.Position = playerPosition - orbitDirection * orbitDistance;
         camera.Target = playerPosition;
         //Raylib.UpdateCamera(ref camera, CameraMode.ThirdPerson);
     }
