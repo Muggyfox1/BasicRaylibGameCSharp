@@ -24,19 +24,34 @@ internal static class Program {
 class Game {
 
     Camera3D camera = new Camera3D();
+
+    bool isMouseLocked = false;
+
     internal void Init() {
         Raylib.InitWindow(800, 480, "Hello, World");
         Raylib.SetTargetFPS(60);
 
-        camera.Position = new Vector3(0, 10, 10);
+        camera.Position = new Vector3(0, 3, 4);
         camera.Target = Vector3.Zero;
         camera.Up = new Vector3(0, 1, 0);
         camera.FovY = 45;
         camera.Projection = CameraProjection.Perspective;
+
+        Raylib.DisableCursor();
     }
 
     internal void Update() {
-        Raylib.UpdateCamera(ref camera, CameraMode.Orbital);
+        if(Raylib.IsKeyPressed(KeyboardKey.Escape)) {
+            isMouseLocked = !isMouseLocked;
+            if(isMouseLocked) {
+                Raylib.DisableCursor();
+            }
+            else {
+                Raylib.EnableCursor();
+            }
+        }
+
+        Raylib.UpdateCamera(ref camera, CameraMode.ThirdPerson);
     }
 
     internal void Draw() {
