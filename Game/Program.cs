@@ -61,13 +61,6 @@ class Game {
             }
         }
 
-        float moveInputX = Raylib.IsKeyDown(KeyboardKey.A) ? 1 : Raylib.IsKeyDown(KeyboardKey.D) ? -1 : 0;
-        float moveInputY = Raylib.IsKeyDown(KeyboardKey.W) ? 1 : Raylib.IsKeyDown(KeyboardKey.S) ? -1 : 0;
-
-        Vector2 playerInput = new Vector2(moveInputX, moveInputY);
-        playerPosition += new Vector3(playerInput.X, playerPosition.Y, playerInput.Y) * playerSpeed * deltaTime;
-
-
         mouseDeltaThisFrame = Raylib.GetMouseDelta();
         if(isMouseLocked) {
             cameraRotation.X += mouseDeltaThisFrame.X * mouseSensitivity; // yaw
@@ -76,14 +69,32 @@ class Game {
         }
 
         float yawRad = cameraRotation.X * Raylib.DEG2RAD;
+        float yawRadSin = MathF.Sin(yawRad);
+        float yawRadCos = MathF.Cos(yawRad);
+
         float pitchRad = cameraRotation.Y * Raylib.DEG2RAD;
+        float pitchRadSin = MathF.Sin(pitchRad);
+        float pitchRadCos = MathF.Cos(pitchRad);
+
+        float moveInputX = Raylib.IsKeyDown(KeyboardKey.A) ? 1 : Raylib.IsKeyDown(KeyboardKey.D) ? -1 : 0;
+        float moveInputY = Raylib.IsKeyDown(KeyboardKey.W) ? 1 : Raylib.IsKeyDown(KeyboardKey.S) ? -1 : 0;
+        Vector2 playerInput = new Vector2(moveInputX, moveInputY);
+        
+        Vector3 cameraForward = Vector3.Normalize(new Vector3(yawRadSin, 0f, yawRadCos));
+        Vector3 cameraRight = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, cameraForward));
+        
+        Vector3 moveDirection = (cameraRight * playerInput.X) + (cameraForward * playerInput.Y);
+        if(moveDirection.LengthSquared() > 0f) {
+            moveDirection = Vector3.Normalize(moveDirection);
+        }
+
+        playerPosition += moveDirection * playerSpeed * deltaTime;
 
         float orbitDistance = cameraOffset.Length();
-
         Vector3 orbitDirection = new Vector3(
-            MathF.Cos(pitchRad) * MathF.Sin(yawRad),
-            MathF.Sin(pitchRad),
-            MathF.Cos(pitchRad) * MathF.Cos(yawRad)
+            pitchRadCos * yawRadSin,
+            pitchRadSin,
+            pitchRadCos * yawRadCos
         );
 
         camera.Position = playerPosition - orbitDirection * orbitDistance;
@@ -112,7 +123,7 @@ class Game {
         Raylib.DrawFPS(12, 12);
 
         //Debug Text
-        Raylib.DrawText(cameraRotation.ToString(), 12, 32, 20, Color.Black);
+        //Raylib.DrawText(cameraRotation.ToString(), 12, 32, 20, Color.Black);
 
         Raylib.EndDrawing();
     }
